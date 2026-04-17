@@ -10,6 +10,10 @@ Batch subtitle generator powered by **Whisper transcription** + **LLM translatio
 - 📝 Chinese subtitles reorganized by **Chinese semantics** — not forced into 1:1 alignment with English cues
 - 🔁 Resume support: progress is saved to a task file and restored automatically
 
+## Screenshots
+
+![Main UI](docs/screenshots/main.png)
+
 ---
 
 ## 1. Installation
@@ -35,8 +39,7 @@ The app searches for Python in this order (bold = recommended):
 
 1. Environment variable `AUTOSUBS_PYTHON`
 2. **`~/autosubs/venv/bin/python3`**
-3. `~/.autosubs/venv/bin/python3` (legacy path, kept for compatibility)
-4. `/opt/homebrew/bin/python3` / `/usr/local/bin/python3` / `/usr/bin/python3`
+3. `/opt/homebrew/bin/python3` / `/usr/local/bin/python3` / `/usr/bin/python3`
 
 ```bash
 # Make sure you have Python 3.10+ (if not: brew install python@3.11)
@@ -55,7 +58,7 @@ pip install mlx-whisper huggingface-hub          # Apple Silicon
 **Step 3 — First launch**
 
 1. Open **AutoSubs Lite** — if the log shows `Whisper backend detected`, the environment is ready
-2. Click **Preferences** → **Whisper Model** → download a model (`large-v3-turbo` recommended, ~1.5 GB)
+2. Click **Preferences** → **Whisper Model** → download a model
 3. Click **Translation Model** → enter your LLM provider details (see [LLM Providers](#llm-providers))
 
 ---
