@@ -117,5 +117,5 @@ jobs:
           body: ${{ steps.changelog.outputs.notes }}
           files: |
             dist/macos/*.dmg
-            dist/windows/*.msi
-            dist/windows/*.exe
+            dist/windows/**/*.msi
+            dist/windows/**/*.exe
