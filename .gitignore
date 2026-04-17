@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.Python
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Rust / Tauri
+target/
+# Cargo.lock is intentionally committed for binary crates (reproducible builds)
+
+# Claude Code local session data
+.claude/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# PyInstaller build artifacts
+build-python/
+dist-python/
+
+# Pre-built sidecar binaries (too large for GitHub, not needed — app uses system Python)
+src-tauri/binaries/
+
+# App data
+*.autosubs_task.json
+
+# Keys (never commit)
+.env
+.env.local
+*.key

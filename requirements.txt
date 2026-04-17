@@ -1,0 +1,15 @@
+# Python dependencies for AutoSubs Lite
+# Install: pip install -r requirements.txt
+
+# ── Whisper (choose one) ──────────────────────────────────────────
+# Apple Silicon (M1/M2/M3) — recommended
+mlx-whisper>=0.4.0
+
+# CPU / CUDA fallback (uncomment if not on Apple Silicon)
+# faster-whisper>=1.0.0
+
+# ── Model download ────────────────────────────────────────────────
+huggingface-hub>=0.23.0
+
+# ── Standard library only for LLM calls (no extra deps) ──────────
+# urllib is built-in — no openai SDK needed
