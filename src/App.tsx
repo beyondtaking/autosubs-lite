@@ -50,7 +50,7 @@ export default function App() {
     // transcription/translation progress for a file
     listen<any>('python:progress', e => {
       const d = e.payload
-      const file = useAppStore.getState().files.find(f => f.relPath === d.file || f.name === d.file)
+      const file = useAppStore.getState().files.find(f => f.path === d.file || f.relPath === d.file || f.name === d.file)
       if (file) updateFileStatus(file.id, { status: 'processing', progress: d.pct, progressMsg: d.msg })
       addLog(`  ${d.msg}`, 'info')
     }).then(u => offs.push(u))
@@ -58,7 +58,7 @@ export default function App() {
     // one file completed
     listen<any>('python:file_done', e => {
       const d = e.payload
-      const file = useAppStore.getState().files.find(f => f.relPath === d.file || f.name === d.file)
+      const file = useAppStore.getState().files.find(f => f.path === d.file || f.relPath === d.file || f.name === d.file)
       if (file) updateFileStatus(file.id, { status: 'done', progress: 1, srtEn: d.srt_en, srtCn: d.srt_cn, language: d.language })
       const cn = d.srt_cn ? ` + ${d.srt_cn}` : ''
       addLog(`✓ ${d.srt_en}${cn}`, 'ok')
@@ -67,7 +67,7 @@ export default function App() {
     // one file error
     listen<any>('python:file_error', e => {
       const d = e.payload
-      const file = useAppStore.getState().files.find(f => f.relPath === d.file || f.name === d.file)
+      const file = useAppStore.getState().files.find(f => f.path === d.file || f.relPath === d.file || f.name === d.file)
       if (file) updateFileStatus(file.id, { status: 'error', error: d.error })
       addLog(`✕ ${d.file}: ${d.error}`, 'error')
     }).then(u => offs.push(u))
@@ -327,7 +327,7 @@ function TitleBar() {
           </svg>
         </div>
         <span className="app-title">{t.appTitle}</span>
-        <span className="app-version">v0.1.1</span>
+        <span className="app-version">v0.1.2</span>
       </div>
 
       <div className="titlebar-right">

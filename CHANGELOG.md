@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/zh-CN/) — `Added / Chang
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-18
+### Fixed
+- 字幕文件队列中存在同名文件（不同子目录）时，进度事件匹配到错误条目，导致处理顺序混乱、已完成条目重复触发
+  - Backend 改为以绝对路径作为文件唯一标识符（原为 basename）
+  - Frontend 匹配逻辑补充 `f.path === d.file` 优先精确匹配
+
 ## [0.1.1] - 2026-04-17
 ### Changed
 - 中文字幕按**中文语义**重新切分，不再强制与英文 cue 一一对齐

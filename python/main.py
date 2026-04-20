@@ -136,7 +136,7 @@ def process_file(abs_path: str, rel_path: str, config: dict) -> dict:
 
     # ── Stage 1: Transcribe ──
     def on_transcribe(pct, msg):
-        emit_progress(fname, "transcribe", pct * 0.70, msg)
+        emit_progress(rel_path, "transcribe", pct * 0.70, msg)
 
     result   = transcribe(abs_path, model_name=model_name, language=language,
                           model_dir=model_dir, on_progress=on_transcribe)
@@ -175,7 +175,7 @@ def process_file(abs_path: str, rel_path: str, config: dict) -> dict:
                  f"（目标 {rseg_cfg['target_chars']} 字符，≤ {rseg_cfg['max_chars']}）")
 
     # ── Stage 2: Write original-language SRT ──
-    emit_progress(fname, "write", 0.72, f"Writing {detected} subtitles…")
+    emit_progress(rel_path, "write", 0.72, f"Writing {detected} subtitles…")
     srt_en_abs = get_srt_path(abs_path, detected)
     write_srt(segments, srt_en_abs, fmt)
 
@@ -183,22 +183,22 @@ def process_file(abs_path: str, rel_path: str, config: dict) -> dict:
 
     # ── Stage 3: Translate → Chinese (optional) ──
     if generate_cn and llm and detected != "zh":
-        emit_progress(fname, "translate", 0.75, "Starting translation…")
+        emit_progress(rel_path, "translate", 0.75, "Starting translation…")
 
         def on_translate(pct, msg):
-            emit_progress(fname, "translate", 0.75 + pct * 0.22, msg)
+            emit_progress(rel_path, "translate", 0.75 + pct * 0.22, msg)
 
         cn_segs   = translate_segments(segments, provider_config=llm,
                                         src_lang=detected, batch_size=batch_size,
                                         proxy=proxy, on_progress=on_translate)
-        emit_progress(fname, "write", 0.97, "Writing Chinese subtitles…")
+        emit_progress(rel_path, "write", 0.97, "Writing Chinese subtitles…")
         srt_cn_abs = get_srt_path(abs_path, "cn")
         write_srt(cn_segs, srt_cn_abs, fmt)
 
     elif generate_cn and detected == "zh":
         emit_log("info", f"Source is already Chinese for {fname} — skipping translation")
 
-    emit_progress(fname, "write", 1.0, "Done")
+    emit_progress(rel_path, "write", 1.0, "Done")
     return {
         "language": detected,
         "srt_en":   srt_en_abs,
@@ -228,7 +228,7 @@ def process_subtitle_file(abs_path: str, rel_path: str, config: dict) -> dict:
         raise ValueError("字幕翻译需要配置翻译模型（偏好设置 → 翻译模型）")
 
     # ── Stage 1: Read and parse subtitle file ──
-    emit_progress(fname, "read", 0.05, "Reading subtitle file…")
+    emit_progress(rel_path, "read", 0.05, "Reading subtitle file…")
     ext = os.path.splitext(abs_path)[1].lower()
 
     with open(abs_path, "r", encoding="utf-8", errors="replace") as f:
@@ -243,10 +243,10 @@ def process_subtitle_file(abs_path: str, rel_path: str, config: dict) -> dict:
     emit_log("info", f"{fname}: 读取到 {len(segments)} 条字幕")
 
     # ── Stage 2: Translate → Chinese ──
-    emit_progress(fname, "translate", 0.10, f"Translating {len(segments)} segments…")
+    emit_progress(rel_path, "translate", 0.10, f"Translating {len(segments)} segments…")
 
     def on_translate(pct, msg):
-        emit_progress(fname, "translate", 0.10 + pct * 0.85, msg)
+        emit_progress(rel_path, "translate", 0.10 + pct * 0.85, msg)
 
     cn_segs = translate_segments(
         segments, provider_config=llm,
@@ -255,14 +255,14 @@ def process_subtitle_file(abs_path: str, rel_path: str, config: dict) -> dict:
     )
 
     # ── Stage 3: Write output ──
-    emit_progress(fname, "write", 0.97, "Writing Chinese subtitle…")
+    emit_progress(rel_path, "write", 0.97, "Writing Chinese subtitle…")
     cn_path = get_cn_subtitle_path(abs_path)
     if ext == ".vtt":
         write_vtt(cn_segs, cn_path)
     else:
         write_srt(cn_segs, cn_path, fmt)
 
-    emit_progress(fname, "write", 1.0, "Done")
+    emit_progress(rel_path, "write", 1.0, "Done")
     return {
         "language": "en",
         "srt_en":   abs_path,  # original subtitle (source)
@@ -316,7 +316,7 @@ def run_queue(config: dict):
         pending.append({
             "path":        p,
             "_abs":        p,
-            "_rel":        os.path.basename(p),
+            "_rel":        p,
             "status":      "pending",
             "is_subtitle": is_sub,
             "_task_item":  False,

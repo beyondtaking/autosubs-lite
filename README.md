@@ -31,7 +31,7 @@ Batch subtitle generator powered by **Whisper transcription** + **LLM translatio
 
 **Step 1 — Install the DMG**
 
-Open `AutoSubs Lite_0.1.1_aarch64.dmg` and drag the app to **Applications**.
+Open `AutoSubs Lite_0.1.2_aarch64.dmg` and drag the app to **Applications**.
 
 **Step 2 — Set up the Python environment (required)**
 

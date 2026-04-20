@@ -318,7 +318,7 @@ def _is_anthropic(base_url: str) -> bool:
 
 
 def _call_api(config: dict, system: str, user: str,
-              max_tokens: int = 4096, max_retries: int = 2) -> str:
+              max_tokens: int = 4096, max_retries: int = 3) -> str:
     """
     Call an LLM chat API.
 
@@ -376,20 +376,21 @@ def _call_api(config: dict, system: str, user: str,
                 data = json.loads(resp.read().decode("utf-8"))
                 if is_anth:
                     # Anthropic response: {"content": [{"type":"text","text":"..."}], ...}
-                    return data["content"][0]["text"]
+                    content = data["content"][0]["text"]
                 else:
-                    return data["choices"][0]["message"]["content"]
+                    content = data["choices"][0]["message"]["content"]
+                if not (content or "").strip():
+                    raise RuntimeError("API 返回空响应（可能触发了频率限制或内容过滤）")
+                return content
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", errors="replace")
             if attempt < max_retries - 1:
-                time.sleep(2 ** attempt)
+                time.sleep(min(30, 3 ** attempt))
                 continue
             raise RuntimeError(f"API error {e.code}: {body}")
         except socket.timeout as e:
-            # Make the error actionable — plain "read operation timed out"
-            # doesn't tell the user which API or what to do.
             if attempt < max_retries - 1:
-                time.sleep(2 ** attempt)
+                time.sleep(min(30, 3 ** attempt))
                 continue
             raise RuntimeError(
                 f"API {base_url} 超时（{READ_TIMEOUT}s 无响应）。"
@@ -398,7 +399,7 @@ def _call_api(config: dict, system: str, user: str,
             ) from e
         except Exception as e:
             if attempt < max_retries - 1:
-                time.sleep(2 ** attempt)
+                time.sleep(min(30, 3 ** attempt))
                 continue
             raise
 
