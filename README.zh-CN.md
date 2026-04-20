@@ -2,7 +2,7 @@
 
 # AutoSubs Lite
 
-批量视频字幕生成工具，基于 **Whisper 转录** + **大模型翻译**。支持批量处理视频、直接翻译已有字幕文件，输出与视频同目录的 `.en.srt` / `.cn.srt` / `.cn.vtt`。
+批量视频字幕生成工具，基于 **Whisper 转录** + **大模型翻译**。支持批量处理视频、直接翻译已有字幕文件，输出与视频同目录的 `.en.srt` / `.zh-CN.srt` / `.zh-CN.vtt`。
 
 - 💻 原生桌面应用（Tauri v2，支持 macOS / Windows）
 - 🎙️ Whisper 本地转录（mlx-whisper（Apple Silicon）/ faster-whisper（Windows / Intel Mac））
@@ -221,11 +221,11 @@ git tag v0.2.0 && git push && git push --tags
 1. **添加视频** → 选文件或文件夹（递归扫描子文件夹）
 2. 右侧选 Whisper 模型、源语言，按需勾选**生成中文字幕**
 3. 点底部 **开始处理**
-4. 完成后同目录生成 `{名}.{语言}.srt`，翻译后另生成 `{名}.cn.srt`
+4. 完成后同目录生成 `{名}.{语言}.srt`，翻译后另生成 `{名}.zh-CN.srt`
 
 ### 4.2 直接翻译已有字幕（跳过 Whisper）
 
-1. 点 **添加字幕文件** → 选文件夹（递归扫描 `.srt` / `.vtt`，跳过 `.cn.*`）
+1. 点 **添加字幕文件** → 选文件夹（递归扫描 `.srt` / `.vtt`，跳过 `.zh-CN.*`）
 2. **必须勾选** 生成中文字幕（否则开始按钮禁用）
 3. 点 **开始处理**
 
@@ -233,10 +233,10 @@ git tag v0.2.0 && git push && git push --tags
 
 | 输入         | 输出         |
 | ------------ | ------------ |
-| `foo.en.srt` | `foo.cn.srt` |
-| `foo.srt`    | `foo.cn.srt` |
-| `foo.en.vtt` | `foo.cn.vtt` |
-| `foo.vtt`    | `foo.cn.vtt` |
+| `foo.en.srt` | `foo.zh-CN.srt` |
+| `foo.srt`    | `foo.zh-CN.srt` |
+| `foo.en.vtt` | `foo.zh-CN.vtt` |
+| `foo.vtt`    | `foo.zh-CN.vtt` |
 
 ### 4.3 断点续传
 

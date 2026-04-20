@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/zh-CN/) — `Added / Chang
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-04-20
+### Changed
+- 中文字幕输出文件名由 `.cn.srt` / `.cn.vtt` 改为 `.zh-CN.srt` / `.zh-CN.vtt`
+- 字幕文件夹扫描时同步跳过旧格式 `.cn.*` 与新格式 `.zh-CN.*` 文件
+
+### Fixed
+- API 返回空响应（频率限制 / 内容过滤）时自动重试，最多 3 次，退避间隔 1 → 3 → 9 秒
+
 ## [0.1.2] - 2026-04-18
 ### Fixed
 - 字幕文件队列中存在同名文件（不同子目录）时，进度事件匹配到错误条目，导致处理顺序混乱、已完成条目重复触发

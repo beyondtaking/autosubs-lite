@@ -92,7 +92,7 @@ export function BottomBar({ logs, height }: Props) {
         <div className="stat">{t.statDuration}<b>{calcDuration(files)}</b></div>
         {!hasSubtitleFiles && <div className="stat">{t.statModel}<b>{selectedModel}</b></div>}
         {generateCn && activeProvider && <div className="stat">{t.statTranslation}<b>{activeProvider.name}</b></div>}
-        <div className="stat">{t.statOutput}<b>{hasSubtitleFiles ? '.cn' : generateCn ? '.en + .cn' : '.en'}</b></div>
+        <div className="stat">{t.statOutput}<b>{hasSubtitleFiles ? '.zh-CN' : generateCn ? '.en + .zh-CN' : '.en'}</b></div>
       </div>
     </div>
   )

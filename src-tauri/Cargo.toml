@@ -1,6 +1,6 @@
 [package]
 name = "autosubs-lite"
-version = "0.1.2"
+version = "0.1.3"
 description = "AutoSubs Lite - Batch subtitle generator"
 authors = []
 edition = "2021"

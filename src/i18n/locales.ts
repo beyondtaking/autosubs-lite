@@ -75,7 +75,7 @@ export const locales = {
 
     // ── CN card ──
     generateCn: '生成中文字幕',
-    generateCnSub: '转录/读取字幕后调用大模型翻译，输出 .cn.srt / .cn.vtt',
+    generateCnSub: '转录/读取字幕后调用大模型翻译，输出 .zh-CN.srt / .zh-CN.vtt',
     translationModel: '翻译模型',
     noModelConfigured: '尚未配置翻译模型 —',
     goToPrefs: '前往偏好设置',
@@ -304,7 +304,7 @@ export const locales = {
 
     // ── CN card ──
     generateCn: 'Generate Chinese Subtitles',
-    generateCnSub: 'Translate via LLM after transcription or from subtitle files, output .cn.srt / .cn.vtt',
+    generateCnSub: 'Translate via LLM after transcription or from subtitle files, output .zh-CN.srt / .zh-CN.vtt',
     translationModel: 'Translation model',
     noModelConfigured: 'No translation model configured —',
     goToPrefs: 'Go to Preferences',

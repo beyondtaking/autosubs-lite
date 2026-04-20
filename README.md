@@ -2,7 +2,7 @@ English | [中文](README.zh-CN.md)
 
 # AutoSubs Lite
 
-Batch subtitle generator powered by **Whisper transcription** + **LLM translation**. Processes videos in bulk or translates existing subtitle files, outputting `.en.srt` / `.cn.srt` / `.cn.vtt` alongside the source.
+Batch subtitle generator powered by **Whisper transcription** + **LLM translation**. Processes videos in bulk or translates existing subtitle files, outputting `.en.srt` / `.zh-CN.srt` / `.zh-CN.vtt` alongside the source.
 
 - 💻 Native desktop app (Tauri v2, macOS & Windows)
 - 🎙️ Local Whisper transcription (mlx-whisper on Apple Silicon / faster-whisper on Windows & Intel Mac)
@@ -31,7 +31,7 @@ Batch subtitle generator powered by **Whisper transcription** + **LLM translatio
 
 **Step 1 — Install the DMG**
 
-Open `AutoSubs Lite_0.1.2_aarch64.dmg` and drag the app to **Applications**.
+Open `AutoSubs Lite_0.1.3_aarch64.dmg` and drag the app to **Applications**.
 
 **Step 2 — Set up the Python environment (required)**
 
@@ -214,11 +214,11 @@ Use `./scripts/bump_version.sh X.Y.Z` to update all 5 version references at once
 1. **Add videos** — pick files or a folder (subfolders scanned recursively)
 2. Select Whisper model and source language; optionally enable **Generate Chinese subtitles**
 3. Click **Start**
-4. Output: `{name}.{lang}.srt` next to each video; `{name}.cn.srt` if translation is enabled
+4. Output: `{name}.{lang}.srt` next to each video; `{name}.zh-CN.srt` if translation is enabled
 
 ### 4.2 Translate existing subtitles (skip Whisper)
 
-1. Click **Add Subtitle Files** → pick a folder (scans `.srt` / `.vtt`, skips `.cn.*`)
+1. Click **Add Subtitle Files** → pick a folder (scans `.srt` / `.vtt`, skips `.zh-CN.*`)
 2. **Generate Chinese subtitles must be checked** (start button is disabled otherwise)
 3. Click **Start**
 
@@ -226,10 +226,10 @@ Output naming:
 
 | Input | Output |
 |---|---|
-| `foo.en.srt` | `foo.cn.srt` |
-| `foo.srt` | `foo.cn.srt` |
-| `foo.en.vtt` | `foo.cn.vtt` |
-| `foo.vtt` | `foo.cn.vtt` |
+| `foo.en.srt` | `foo.zh-CN.srt` |
+| `foo.srt` | `foo.zh-CN.srt` |
+| `foo.en.vtt` | `foo.zh-CN.vtt` |
+| `foo.vtt` | `foo.zh-CN.vtt` |
 
 ### 4.3 Resume interrupted runs
 

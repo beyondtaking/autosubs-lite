@@ -17,9 +17,9 @@ from typing import Optional
 # ── Subtitle output path helpers ──────────────────────────────────
 
 # Language tag suffixes that may appear before the file extension
-# e.g.  "lesson01.en.srt" → strip ".en" → "lesson01.cn.srt"
+# e.g.  "lesson01.en.srt" → strip ".en" → "lesson01.zh-CN.srt"
 _LANG_TAG_RE = re.compile(
-    r'\.(en|zh|ja|ko|fr|de|es|it|ru|pt|ar|nl|pl|sv|da|fi|cs|hu|tr|vi|th|id|ms|uk|hr|bg|ro|sk|no|ca|he|hi)$',
+    r'\.(zh-CN|zh-TW|en|zh|ja|ko|fr|de|es|it|ru|pt|ar|nl|pl|sv|da|fi|cs|hu|tr|vi|th|id|ms|uk|hr|bg|ro|sk|no|ca|he|hi)$',
     re.IGNORECASE
 )
 
@@ -244,17 +244,17 @@ def get_cn_subtitle_path(subtitle_path: str) -> str:
     preserving the original format extension.
 
     Examples:
-        lesson01.en.srt  →  lesson01.cn.srt
-        lesson01.srt     →  lesson01.cn.srt
-        lesson01.en.vtt  →  lesson01.cn.vtt
-        lesson01.vtt     →  lesson01.cn.vtt
+        lesson01.en.srt  →  lesson01.zh-CN.srt
+        lesson01.srt     →  lesson01.zh-CN.srt
+        lesson01.en.vtt  →  lesson01.zh-CN.vtt
+        lesson01.vtt     →  lesson01.zh-CN.vtt
     """
     dirname  = os.path.dirname(subtitle_path)
     basename = os.path.basename(subtitle_path)
     name, ext = os.path.splitext(basename)       # ext: ".srt" | ".vtt" | …
     # strip language tag if present (e.g. ".en" from "lesson01.en")
     name = _LANG_TAG_RE.sub('', name)
-    return os.path.join(dirname, f"{name}.cn{ext}")
+    return os.path.join(dirname, f"{name}.zh-CN{ext}")
 
 
 # ── VTT WRITER ────────────────────────────────────────────────────

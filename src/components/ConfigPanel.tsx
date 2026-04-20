@@ -148,7 +148,7 @@ function ModelLanguageTab() {
             <div className="out-row">
               <div className="out-icon cn" />
               <span className="out-name">
-                video.cn.srt <span style={{ color: 'var(--text3)', fontSize: 10 }}>{t.outputCn}</span>
+                video.zh-CN.srt <span style={{ color: 'var(--text3)', fontSize: 10 }}>{t.outputCn}</span>
               </span>
             </div>
           )}

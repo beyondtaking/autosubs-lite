@@ -52,9 +52,9 @@ def scan_subtitle_folder(root_dir: str) -> list:
     for f in sorted(root.rglob("*")):
         if f.suffix.lower() not in SUBTITLE_EXTENSIONS or not f.is_file():
             continue
-        # Skip files that are already Chinese translations (foo.cn.srt)
+        # Skip files that are already Chinese translations (foo.zh-CN.srt / foo.cn.srt)
         stem = f.stem  # "lesson01.en" for "lesson01.en.srt"
-        if stem.lower().endswith('.cn'):
+        if stem.lower().endswith('.zh-cn') or stem.lower().endswith('.cn'):
             continue
         rel = str(f.relative_to(root))
         files.append({

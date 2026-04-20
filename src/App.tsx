@@ -135,7 +135,7 @@ export default function App() {
         }
       })
       if (incoming.length) addFiles(incoming)
-      else addLog('字幕文件夹中未找到字幕文件（已跳过 .cn.* 文件）', 'warn')
+      else addLog('字幕文件夹中未找到字幕文件（已跳过 .zh-CN.* / .cn.* 文件）', 'warn')
       addLog(`Scanned subtitle folder: ${incoming.length} files`, 'info')
     }).then(u => offs.push(u))
 
@@ -327,7 +327,7 @@ function TitleBar() {
           </svg>
         </div>
         <span className="app-title">{t.appTitle}</span>
-        <span className="app-version">v0.1.2</span>
+        <span className="app-version">v0.1.3</span>
       </div>
 
       <div className="titlebar-right">

@@ -192,7 +192,7 @@ def process_file(abs_path: str, rel_path: str, config: dict) -> dict:
                                         src_lang=detected, batch_size=batch_size,
                                         proxy=proxy, on_progress=on_translate)
         emit_progress(rel_path, "write", 0.97, "Writing Chinese subtitles…")
-        srt_cn_abs = get_srt_path(abs_path, "cn")
+        srt_cn_abs = get_srt_path(abs_path, "zh-CN")
         write_srt(cn_segs, srt_cn_abs, fmt)
 
     elif generate_cn and detected == "zh":
@@ -211,7 +211,7 @@ def process_file(abs_path: str, rel_path: str, config: dict) -> dict:
 def process_subtitle_file(abs_path: str, rel_path: str, config: dict) -> dict:
     """
     Translate an existing subtitle file to Chinese.
-    Reads → parses → translates → writes .cn.srt / .cn.vtt.
+    Reads → parses → translates → writes .zh-CN.srt / .zh-CN.vtt.
     Returns {"srt_en": original_path, "srt_cn": cn_path, "language": "en"}.
     Raises on error.
     """
