@@ -33,12 +33,26 @@ def _vtt_time_to_seconds(ts: str) -> float:
 
 # ── SRT parser ────────────────────────────────────────────────────
 
+def _normalize_line_endings(content: str) -> str:
+    """Normalize all CR variants to LF.
+
+    Handles standard \r\n (Windows), lone \r (old Mac), and the non-standard
+    \r\r\n produced by some subtitle export tools (e.g. Udemy downloads).
+    Strategy: collapse any run of \r immediately before \n into a single \n,
+    then convert any remaining lone \r to \n.
+    """
+    content = re.sub(r'\r+\n', '\n', content)   # \r\r\n, \r\n \u2192 \n
+    content = content.replace('\r', '\n')         # lone \r \u2192 \n
+    return content
+
+
 def parse_srt(content: str) -> list:
     """
     Parse SRT content into a list of segment dicts.
-    Handles BOM, HTML tags, and multi-line cues.
+    Handles BOM, HTML tags, multi-line cues, and non-standard line endings.
     """
-    content = content.lstrip('\ufeff')  # strip BOM
+    content = content.lstrip('\ufeff')           # strip BOM
+    content = _normalize_line_endings(content)
     segments = []
     # split on 1+ blank lines between cues
     blocks = re.split(r'\n\s*\n', content.strip())
@@ -74,9 +88,10 @@ def parse_srt(content: str) -> list:
 def parse_vtt(content: str) -> list:
     """
     Parse WebVTT content into a list of segment dicts.
-    Handles optional cue identifiers, NOTE and STYLE blocks.
+    Handles optional cue identifiers, NOTE and STYLE blocks, and non-standard line endings.
     """
     content = content.lstrip('\ufeff')
+    content = _normalize_line_endings(content)
     # drop WEBVTT header line
     content = re.sub(r'^WEBVTT[^\n]*\n', '', content, count=1)
     # drop NOTE and STYLE blocks

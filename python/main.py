@@ -231,7 +231,9 @@ def process_subtitle_file(abs_path: str, rel_path: str, config: dict) -> dict:
     emit_progress(rel_path, "read", 0.05, "Reading subtitle file…")
     ext = os.path.splitext(abs_path)[1].lower()
 
-    with open(abs_path, "r", encoding="utf-8", errors="replace") as f:
+    # Open with newline='' to preserve raw line endings (\r\r\n, \r\n, \r).
+    # The subtitle parser normalises them before splitting into blocks.
+    with open(abs_path, "r", encoding="utf-8", errors="replace", newline='') as f:
         content = f.read()
 
     from subtitle_reader import parse_srt, parse_vtt
