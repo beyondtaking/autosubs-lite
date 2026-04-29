@@ -327,7 +327,7 @@ function TitleBar() {
           </svg>
         </div>
         <span className="app-title">{t.appTitle}</span>
-        <span className="app-version">v0.1.3</span>
+        <span className="app-version">v0.1.4</span>
       </div>
 
       <div className="titlebar-right">
