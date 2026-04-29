@@ -79,6 +79,7 @@ export interface AppState {
   addFiles: (files: QueueFile[]) => void
   clearFiles: () => void
   updateFileStatus: (id: string, patch: Partial<QueueFile>) => void
+  resetFilesStatus: (ids: string[]) => void
   setTaskFile: (summary: AppState['taskFileSummary']) => void
   dismissTaskFile: () => void
 
@@ -189,6 +190,11 @@ export const useAppStore = create<AppState>()(
       clearFiles: () => set({ files: [], rootDir: null, taskFileLoaded: false, taskFileSummary: null }),
       updateFileStatus: (id, patch) => set((s) => ({
         files: s.files.map((f) => f.id === id ? { ...f, ...patch } : f),
+      })),
+      resetFilesStatus: (ids) => set((s) => ({
+        files: s.files.map((f) => ids.includes(f.id)
+          ? { ...f, status: 'pending', error: null, progress: 0, progressMsg: '' }
+          : f),
       })),
       setTaskFile: (summary) => set({ taskFileLoaded: true, taskFileSummary: summary }),
       dismissTaskFile: () => set({ taskFileLoaded: false, taskFileSummary: null }),

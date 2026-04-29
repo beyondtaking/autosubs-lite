@@ -1,14 +1,16 @@
 // src/components/QueuePanel.tsx
 
+import { useState, useRef, useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { useAppStore, QueueFile } from '../stores/appStore'
 import { useLocale } from '../i18n/useLocale'
+import { buildRetryConfig } from './retryConfig'
 
 export function QueuePanel() {
   const { t } = useLocale()
   const {
     files, rootDir, taskFileLoaded, taskFileSummary,
-    addFiles, clearFiles, setRootDir, setTaskFile, dismissTaskFile,
+    addFiles, clearFiles, setRootDir, setTaskFile, dismissTaskFile, resetFilesStatus, startRun,
   } = useAppStore()
 
   async function handleAddFiles() {
@@ -34,11 +36,33 @@ export function QueuePanel() {
     await invoke('send_to_python', { cmd: { cmd: 'scan_folder', root_dir: dir } })
   }
 
+  async function handleAddSubtitleFiles() {
+    const paths: string[] = await invoke('pick_subtitle_files')
+    if (!paths.length) return
+    const newFiles: QueueFile[] = paths.map((p) => ({
+      id: p, path: p, relPath: p,
+      name: p.split('/').pop() ?? p,
+      dir: p.split('/').slice(0, -1).join('/'),
+      duration: null, status: 'pending',
+      srtEn: null, srtCn: null,
+      isSubtitle: true,
+      language: null, error: null,
+      progress: 0, progressMsg: '',
+    }))
+    addFiles(newFiles)
+  }
+
   async function handleAddSubtitleFolder() {
     const dir: string | null = await invoke('pick_folder')
     if (!dir) return
-    // Don't set rootDir — subtitle scan is additive, doesn't affect video task file
     await invoke('send_to_python', { cmd: { cmd: 'scan_subtitle_folder', root_dir: dir } })
+  }
+
+  async function handleRetryFile(file: QueueFile) {
+    resetFilesStatus([file.id])
+    startRun()
+    const store = useAppStore.getState()
+    await invoke('send_to_python', { cmd: { cmd: 'start', config: buildRetryConfig(store, [file.id]) } })
   }
 
   const doneCount = files.filter((f) => f.status === 'done').length
@@ -55,9 +79,11 @@ export function QueuePanel() {
           <button className="btn btn-card" onClick={handleAddFolder}>
             <IconFolder /> {t.addFolder}
           </button>
-          <button className="btn btn-card" onClick={handleAddSubtitleFolder}>
-            <IconSub /> {t.addSubFile}
-          </button>
+          <SubtitleDropdown
+            t={t}
+            onAddFiles={handleAddSubtitleFiles}
+            onAddFolder={handleAddSubtitleFolder}
+          />
           {files.length > 0 && (
             <button className="btn btn-danger" onClick={clearFiles}>{t.clearQueue}</button>
           )}
@@ -83,7 +109,7 @@ export function QueuePanel() {
             </span>
           </div>
           {files.map((f, i) => (
-            <FileItem key={f.id} file={f} index={i + 1} t={t} />
+            <FileItem key={f.id} file={f} index={i + 1} t={t} onRetry={handleRetryFile} />
           ))}
         </div>
       )}
@@ -91,7 +117,49 @@ export function QueuePanel() {
   )
 }
 
-function FileItem({ file, index, t }: { file: QueueFile; index: number; t: any }) {
+// ── Subtitle dropdown button ──────────────────────────────────────
+
+function SubtitleDropdown({ t, onAddFiles, onAddFolder }: {
+  t: any
+  onAddFiles: () => void
+  onAddFolder: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClickOut(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOut)
+    return () => document.removeEventListener('mousedown', onClickOut)
+  }, [])
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button className="btn btn-card" onClick={() => setOpen(o => !o)}>
+        <IconSub /> {t.addSubFile} <span style={{ marginLeft: 2, opacity: 0.6, fontSize: 8 }}>▾</span>
+      </button>
+      {open && (
+        <div className="dropdown-menu">
+          <button className="dropdown-item" onClick={() => { onAddFiles(); setOpen(false) }}>
+            📄 {t.addSubFilesSingle}
+          </button>
+          <button className="dropdown-item" onClick={() => { onAddFolder(); setOpen(false) }}>
+            📁 {t.addSubFilesFolder}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── File item ─────────────────────────────────────────────────────
+
+function FileItem({ file, index, t, onRetry }: {
+  file: QueueFile; index: number; t: any
+  onRetry: (f: QueueFile) => void
+}) {
   const cls = { pending:'fi-pending', processing:'fi-processing', done:'fi-done', error:'fi-error' }[file.status]
   const dur = file.duration ? formatDuration(file.duration) : null
   return (
@@ -117,6 +185,13 @@ function FileItem({ file, index, t }: { file: QueueFile; index: number; t: any }
       <div className="fi-right">
         {dur && <span className="fi-dur">{dur}</span>}
         {file.status==='processing' && <div className="spin" />}
+        {file.status==='error' && (
+          <button
+            className="retry-btn"
+            title={t.retry}
+            onClick={() => onRetry(file)}
+          >↺</button>
+        )}
       </div>
     </div>
   )

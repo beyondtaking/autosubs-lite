@@ -32,6 +32,23 @@ async fn pick_files(app: AppHandle) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+async fn pick_subtitle_files(app: AppHandle) -> Result<Vec<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    let files = app
+        .dialog()
+        .file()
+        .add_filter("Subtitle", &["srt","vtt","ass","ssa","sub","smi"])
+        .blocking_pick_files();
+    match files {
+        Some(paths) => Ok(paths.into_iter()
+            .filter_map(|p| p.into_path().ok())
+            .map(|p| p.to_string_lossy().to_string())
+            .collect()),
+        None => Ok(vec![]),
+    }
+}
+
+#[tauri::command]
 async fn pick_folder(app: AppHandle) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::DialogExt;
     let folder = app.dialog().file().blocking_pick_folder();
@@ -292,6 +309,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             pick_files,
+            pick_subtitle_files,
             pick_folder,
             pick_directory,
             send_to_python,

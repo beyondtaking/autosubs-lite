@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { useAppStore } from '../stores/appStore'
 import { useLocale } from '../i18n/useLocale'
+import { buildRetryConfig } from './retryConfig'
 
 export interface LogEntry {
   time: string
@@ -15,11 +16,12 @@ interface Props { logs: LogEntry[]; height: number }
 
 export function BottomBar({ logs, height }: Props) {
   const { t } = useLocale()
-  const { files, isRunning, selectedModel, generateCn, activeLLMId, providers, startRun, stopRun } = useAppStore()
+  const { files, isRunning, selectedModel, generateCn, activeLLMId, providers, startRun, stopRun, resetFilesStatus } = useAppStore()
   const logRef = useRef<HTMLDivElement>(null)
 
-  const done  = files.filter(f => f.status === 'done').length
-  const total = files.length
+  const done       = files.filter(f => f.status === 'done').length
+  const errorFiles = files.filter(f => f.status === 'error')
+  const total      = files.length
   const processing = files.find(f => f.status === 'processing')
   const pct = total > 0 ? done / total : 0
   const activeProvider = providers.find(p => p.id === activeLLMId)
@@ -40,6 +42,13 @@ export function BottomBar({ logs, height }: Props) {
     await invoke('send_to_python', { cmd: { cmd: 'stop' } })
     stopRun()
   }
+  async function handleRetryFailed() {
+    const ids = errorFiles.map(f => f.id)
+    resetFilesStatus(ids)
+    startRun()
+    const store = useAppStore.getState()
+    await invoke('send_to_python', { cmd: { cmd: 'start', config: buildRetryConfig(store, ids) } })
+  }
 
   return (
     <div className="bottom-bar" style={{ height }}>
@@ -58,12 +67,19 @@ export function BottomBar({ logs, height }: Props) {
         {total > 0 && (
           isRunning
             ? <button className="run-btn stop" onClick={handleStop}>{t.stop}</button>
-            : <button
-                className="run-btn"
-                onClick={handleStart}
-                disabled={done === total || subtitleBlocked}
-                title={subtitleBlocked ? t.subtitleScanHint : undefined}
-              >{t.startProcessing}</button>
+            : <div style={{ display:'flex', gap:4 }}>
+                {errorFiles.length > 0 && (
+                  <button className="run-btn retry" onClick={handleRetryFailed}>
+                    ↺ {t.retryFailed(errorFiles.length)}
+                  </button>
+                )}
+                <button
+                  className="run-btn"
+                  onClick={handleStart}
+                  disabled={done === total || subtitleBlocked}
+                  title={subtitleBlocked ? t.subtitleScanHint : undefined}
+                >{t.startProcessing}</button>
+              </div>
         )}
       </div>
 

@@ -19,7 +19,9 @@ export const locales = {
     queue: '视频队列',
     addFile: '添加视频文件',
     addFolder: '添加视频文件夹',
-    addSubFile: '添加字幕文件',
+    addSubFile: '添加字幕',
+    addSubFilesSingle: '选择字幕文件（单个/多选）',
+    addSubFilesFolder: '扫描字幕文件夹（递归）',
     clearQueue: '清空',
     sortBy: '排序：',
     sortPath: '路径',
@@ -36,6 +38,8 @@ export const locales = {
     // ── File status badges ──
     done: '已完成',
     failed: '失败',
+    retry: '重试',
+    retryFailed: (n: number) => `重试失败 (${n})`,
 
     // ── Task banner ──
     taskDetected: '检测到任务文件',
@@ -248,7 +252,9 @@ export const locales = {
     queue: 'Video Queue',
     addFile: 'Add Video Files',
     addFolder: 'Add Video Folder',
-    addSubFile: 'Add Subtitle Files',
+    addSubFile: 'Add Subtitles',
+    addSubFilesSingle: 'Pick subtitle files (multi-select)',
+    addSubFilesFolder: 'Scan subtitle folder (recursive)',
     clearQueue: 'Clear',
     sortBy: 'Sort:',
     sortPath: 'Path',
@@ -265,6 +271,8 @@ export const locales = {
     // ── Status badges ──
     done: 'Done',
     failed: 'Failed',
+    retry: 'Retry',
+    retryFailed: (n: number) => `Retry failed (${n})`,
 
     // ── Task banner ──
     taskDetected: 'Task file detected',

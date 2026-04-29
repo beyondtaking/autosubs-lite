@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/zh-CN/) — `Added / Chang
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-04-29
+### Added
+- 添加字幕按钮改为下拉菜单，同时支持「添加单个字幕文件」和「添加字幕文件夹」
+- 失败任务可重试：队列中每个失败条目显示 ↺ 按钮，可单独重试；底部栏新增「↺ 重试失败 (N)」批量重试按钮
+
 ## [0.1.3] - 2026-04-20
 ### Changed
 - 中文字幕输出文件名由 `.cn.srt` / `.cn.vtt` 改为 `.zh-CN.srt` / `.zh-CN.vtt`

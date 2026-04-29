@@ -686,6 +686,31 @@ body {
 .run-btn:disabled         { opacity: .4; cursor: default; pointer-events: none; }
 .run-btn.stop             { background: transparent; border-color: var(--danger); color: var(--danger); }
 .run-btn.stop:hover       { background: var(--danger); color: #fff; }
+.run-btn.retry            { background: transparent; border-color: var(--warn, #f59e0b); color: var(--warn, #f59e0b); padding: 4px 12px; }
+.run-btn.retry:hover      { background: var(--warn, #f59e0b); color: #fff; }
+
+/* ── Retry button on error items ── */
+.retry-btn {
+  background: none; border: 1px solid var(--danger); color: var(--danger);
+  border-radius: 4px; padding: 1px 6px; font-size: 13px; cursor: pointer;
+  line-height: 1.4; transition: all .15s;
+}
+.retry-btn:hover { background: var(--danger); color: #fff; }
+
+/* ── Subtitle dropdown menu ── */
+.dropdown-menu {
+  position: absolute; top: calc(100% + 4px); right: 0; z-index: 200;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  min-width: 200px; overflow: hidden;
+}
+.dropdown-item {
+  display: block; width: 100%; text-align: left;
+  padding: 7px 12px; font-size: 12px;
+  background: none; border: none; color: var(--text1);
+  cursor: pointer; transition: background .1s;
+}
+.dropdown-item:hover { background: var(--hover); }
 
 .progress-track {
   height: 2px;
