@@ -70,11 +70,6 @@ export function BottomBar({ logs, height }: Props) {
             <>{t.addFilesHint}</>
           )}
         </div>
-        {folderName && (
-          <div className="folder-chip" title={rootDir ?? subtitleDir ?? undefined}>
-            <span className="folder-chip-icon">📁</span>{folderName}
-          </div>
-        )}
         {total > 0 && (
           isRunning
             ? <button className="run-btn stop" onClick={handleStop}>{t.stop}</button>
@@ -120,6 +115,11 @@ export function BottomBar({ logs, height }: Props) {
         {!hasSubtitleFiles && <div className="stat">{t.statModel}<b>{selectedModel}</b></div>}
         {generateCn && activeProvider && <div className="stat">{t.statTranslation}<b>{activeProvider.name}</b></div>}
         <div className="stat">{t.statOutput}<b>{hasSubtitleFiles ? '.zh-CN' : generateCn ? '.en + .zh-CN' : '.en'}</b></div>
+        {folderName && (
+          <div className="stat stat-folder" title={rootDir ?? subtitleDir ?? undefined}>
+            {t.statFolder}<b>{folderName}</b>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -671,21 +671,13 @@ body {
 .progress-status { font-size: 12px; color: var(--text2); }
 .progress-status b { color: var(--accent); }
 
-.folder-chip {
-  font-size: 10px;
-  color: var(--text3);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 8px;
-  max-width: 260px;
+.stat-folder {
+  max-width: 320px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: default;
-  user-select: none;
 }
-.folder-chip-icon { margin-right: 4px; font-size: 9px; }
 
 .run-btn {
   background: var(--accent-dim);

@@ -170,6 +170,7 @@ export const locales = {
     statModel: '模型：',
     statTranslation: '翻译：',
     statOutput: '输出：',
+    statFolder: '文件夹：',
 
     // ── Prefs panel ──
     prefTitle: '偏好设置',
@@ -403,6 +404,7 @@ export const locales = {
     statModel: 'Model:',
     statTranslation: 'Translation:',
     statOutput: 'Output:',
+    statFolder: 'Folder:',
 
     // ── Prefs panel ──
     prefTitle: 'Preferences',
