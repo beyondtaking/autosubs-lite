@@ -13,7 +13,14 @@ export function buildRetryConfig(
     : null
 
   const targetFiles = s.files.filter(f => fileIds.includes(f.id))
-  const explicitFiles = targetFiles.map(f => ({ path: f.path, is_subtitle: f.isSubtitle }))
+  const explicitFiles = targetFiles.map(f => {
+    // Folder-scanned video files store a relative path in f.path.
+    // Compose the absolute path using rootDir so Python can find the file.
+    const absPath = (s.rootDir && !f.path.startsWith('/'))
+      ? `${s.rootDir}/${f.path}`
+      : f.path
+    return { path: absPath, is_subtitle: f.isSubtitle }
+  })
 
   return {
     root_dir: null,   // retry always uses explicit file list, never task file

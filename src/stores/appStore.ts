@@ -72,10 +72,12 @@ export interface AppState {
 
   // ── queue ──
   files: QueueFile[]
-  rootDir: string | null
+  rootDir: string | null       // video folder (folder scan mode)
+  subtitleDir: string | null   // subtitle folder (subtitle folder scan mode)
   taskFileLoaded: boolean
   taskFileSummary: { total: number; done: number; pending: number; updated: string } | null
   setRootDir: (dir: string | null) => void
+  setSubtitleDir: (dir: string | null) => void
   addFiles: (files: QueueFile[]) => void
   clearFiles: () => void
   updateFileStatus: (id: string, patch: Partial<QueueFile>) => void
@@ -180,14 +182,16 @@ export const useAppStore = create<AppState>()(
       // queue
       files: [],
       rootDir: null,
+      subtitleDir: null,
       taskFileLoaded: false,
       taskFileSummary: null,
       setRootDir: (dir) => set({ rootDir: dir }),
+      setSubtitleDir: (dir) => set({ subtitleDir: dir }),
       addFiles: (newFiles) => set((s) => {
         const existing = new Set(s.files.map((f) => f.id))
         return { files: [...s.files, ...newFiles.filter((f) => !existing.has(f.id))] }
       }),
-      clearFiles: () => set({ files: [], rootDir: null, taskFileLoaded: false, taskFileSummary: null }),
+      clearFiles: () => set({ files: [], rootDir: null, subtitleDir: null, taskFileLoaded: false, taskFileSummary: null }),
       updateFileStatus: (id, patch) => set((s) => ({
         files: s.files.map((f) => f.id === id ? { ...f, ...patch } : f),
       })),

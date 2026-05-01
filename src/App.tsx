@@ -17,7 +17,7 @@ const MAX_BOTTOM_H = 320
 const MIN_LEFT_W   = 240
 
 export default function App() {
-  const { theme, files, updateFileStatus, addFiles, setTaskFile, stopRun, prefOpen } = useAppStore()
+  const { theme, files, updateFileStatus, addFiles, setTaskFile, setSubtitleDir, stopRun, prefOpen } = useAppStore()
 
   // ── Apply theme ────────────────────────────────────────────────
   useEffect(() => {
@@ -115,6 +115,7 @@ export default function App() {
     listen<any>('python:subtitle_folder_scanned', e => {
       const d = e.payload
       const rootDir: string = d.root_dir ?? ''
+      if (rootDir) setSubtitleDir(rootDir)
       const incoming = (d.files ?? []).map((f: any) => {
         const absPath = rootDir ? `${rootDir}/${f.path}` : f.path
         return {
@@ -327,7 +328,7 @@ function TitleBar() {
           </svg>
         </div>
         <span className="app-title">{t.appTitle}</span>
-        <span className="app-version">v0.1.4</span>
+        <span className="app-version">v0.1.5</span>
       </div>
 
       <div className="titlebar-right">

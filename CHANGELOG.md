@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/zh-CN/) — `Added / Chang
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-05-01
+### Added
+- 底部栏进度区域显示当前打开的视频文件夹或字幕文件夹名称（悬停可见完整路径）
+
+### Fixed
+- 通过「添加视频文件夹」扫描入队的视频文件，点击「↺ 重试」或「重试失败」时报 File not found
+  - 根因：folder scan 在 store 中存的是相对路径，重试时未拼接 rootDir 导致 Python 找不到文件
+  - 修复：retryConfig.ts 对非绝对路径的视频文件自动拼接 rootDir 组成绝对路径
+
 ## [0.1.4] - 2026-04-29
 ### Added
 - 添加字幕按钮改为下拉菜单，同时支持「添加单个字幕文件」和「添加字幕文件夹」

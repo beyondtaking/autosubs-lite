@@ -16,7 +16,7 @@ interface Props { logs: LogEntry[]; height: number }
 
 export function BottomBar({ logs, height }: Props) {
   const { t } = useLocale()
-  const { files, isRunning, selectedModel, generateCn, activeLLMId, providers, startRun, stopRun, resetFilesStatus } = useAppStore()
+  const { files, rootDir, subtitleDir, isRunning, selectedModel, generateCn, activeLLMId, providers, startRun, stopRun, resetFilesStatus } = useAppStore()
   const logRef = useRef<HTMLDivElement>(null)
 
   const done       = files.filter(f => f.status === 'done').length
@@ -28,6 +28,12 @@ export function BottomBar({ logs, height }: Props) {
   const hasSubtitleFiles = files.some(f => f.isSubtitle)
   // If subtitle files are in queue, generateCn must be checked to start
   const subtitleBlocked = hasSubtitleFiles && !generateCn
+
+  // Folder name chip: show the last path component of the active source folder
+  const folderName = total > 0
+    ? (rootDir ?? (hasSubtitleFiles ? subtitleDir : null))
+        ?.split('/').filter(Boolean).pop() ?? null
+    : null
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
@@ -64,6 +70,11 @@ export function BottomBar({ logs, height }: Props) {
             <>{t.addFilesHint}</>
           )}
         </div>
+        {folderName && (
+          <div className="folder-chip" title={rootDir ?? subtitleDir ?? undefined}>
+            <span className="folder-chip-icon">📁</span>{folderName}
+          </div>
+        )}
         {total > 0 && (
           isRunning
             ? <button className="run-btn stop" onClick={handleStop}>{t.stop}</button>
