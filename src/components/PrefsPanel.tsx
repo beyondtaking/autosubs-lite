@@ -78,8 +78,9 @@ function LLMTab() {
   const [testing, setTesting] = useState<Record<string,'idle'|'testing'>>({})
   const [statuses, setStatuses] = useState<Record<string, LLMStatus | undefined>>({})
 
-  // Model-list fetching state (keyed by provider id) — mirrors the test_llm pattern
-  const [modelLists,    setModelLists]    = useState<Record<string, string[]>>({})
+  // Model-list fetching state (keyed by provider id). The fetched list itself
+  // lives in the store (provider.modelList, persisted); only the transient
+  // loading / error / open-dropdown UI state is local.
   const [fetchingModels, setFetchingModels] = useState<Record<string, boolean>>({})
   const [modelErrors,   setModelErrors]   = useState<Record<string, string | undefined>>({})
   const [openDropdown,  setOpenDropdown]  = useState<string | null>(null)
@@ -112,7 +113,8 @@ function LLMTab() {
       const models: string[] = e.payload?.models ?? []
       setFetchingModels(s => ({ ...s, [pid]: false }))
       setModelErrors(s => ({ ...s, [pid]: undefined }))
-      setModelLists(s => ({ ...s, [pid]: models }))
+      // Persist the list on the provider so it survives panel close/reopen.
+      useAppStore.getState().updateProvider(pid, { modelList: models })
       setOpenDropdown(models.length > 0 ? pid : null)
     }).then(u => offs.push(u))
     listen<any>('python:llm_models_error', e => {
@@ -201,7 +203,7 @@ function LLMTab() {
                     <label>{t.llmModel}</label>
                     <ModelPicker
                       provider={p}
-                      models={modelLists[p.id] ?? []}
+                      models={p.modelList ?? []}
                       loading={!!fetchingModels[p.id]}
                       error={modelErrors[p.id]}
                       open={openDropdown === p.id}
@@ -353,6 +355,7 @@ function ModelPicker({
           placeholder={t.llmModelsFilter}
           onChange={e => { onChange(e.target.value); if (!open && models.length > 0) onOpen() }}
           onFocus={() => { if (models.length > 0) onOpen() }}
+          onClick={() => { if (!open && models.length > 0) onOpen() }}
         />
         {!isAnthropic && (
           <button

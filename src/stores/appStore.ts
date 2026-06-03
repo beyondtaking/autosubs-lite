@@ -31,6 +31,8 @@ export interface LLMProvider {
   baseUrl: string
   apiKey: string
   model: string
+  modelList?: string[] // last fetched /models list, persisted so the dropdown
+                       // survives panel close/reopen (refresh with the ↻ button)
 }
 
 export interface ProxyConfig {
