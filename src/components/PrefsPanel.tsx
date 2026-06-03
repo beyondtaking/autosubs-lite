@@ -206,8 +206,7 @@ function LLMTab() {
                       error={modelErrors[p.id]}
                       open={openDropdown === p.id}
                       onFetch={() => handleFetchModels(p)}
-                      onToggleOpen={() =>
-                        setOpenDropdown(openDropdown === p.id ? null : p.id)}
+                      onOpen={() => setOpenDropdown(p.id)}
                       onClose={() => setOpenDropdown(null)}
                       onChange={v => updateProvider(p.id, { model: v })}
                       onSelect={v => { updateProvider(p.id, { model: v }); setOpenDropdown(null) }}
@@ -262,11 +261,13 @@ function LLMTab() {
   )
 }
 
-// ── Model Picker (input + fetch button + dropdown) ────────────────
+// ── Model Picker (combobox: input is the filter, dropdown is a fixed overlay) ──
+
+type DropPos = { left: number; width: number; top?: number; bottom?: number }
 
 function ModelPicker({
   provider, models, loading, error, open,
-  onFetch, onToggleOpen, onClose, onChange, onSelect, t,
+  onFetch, onOpen, onClose, onChange, onSelect, t,
 }: {
   provider: LLMProvider
   models: string[]
@@ -274,42 +275,84 @@ function ModelPicker({
   error?: string
   open: boolean
   onFetch: () => void
-  onToggleOpen: () => void
+  onOpen: () => void
   onClose: () => void
   onChange: (v: string) => void
   onSelect: (v: string) => void
   t: any
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [filter, setFilter] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dropRef  = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<DropPos | null>(null)
 
   // Anthropic endpoints have no compatible /models list
   const isAnthropic = /anthropic\.com/.test(provider.baseUrl)
 
-  // Close dropdown when clicking outside
+  // The model input itself acts as the filter. When its value exactly matches
+  // a known model (i.e. one was just picked), treat it as "browse mode" and
+  // show the full list so the user can switch freely.
+  const value  = provider.model
+  const query  = models.includes(value) ? '' : value.trim().toLowerCase()
+  const filtered = query
+    ? models.filter(m => m.toLowerCase().includes(query))
+    : models
+
+  // Position the fixed-overlay dropdown under (or above) the input.
+  function reposition() {
+    const el = inputRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const rows       = Math.max(1, filtered.length)
+    const desiredH   = Math.min(244, rows * 30 + 4)
+    const spaceBelow = window.innerHeight - r.bottom
+    if (spaceBelow < desiredH && r.top > spaceBelow) {
+      setPos({ left: r.left, width: r.width, bottom: window.innerHeight - r.top + 4 })
+    } else {
+      setPos({ left: r.left, width: r.width, top: r.bottom + 4 })
+    }
+  }
+
+  // Reposition whenever opened, and on scroll/resize while open.
+  useEffect(() => {
+    if (!open) { setPos(null); return }
+    reposition()
+    function onMove() { reposition() }
+    window.addEventListener('scroll', onMove, true)  // capture: catch inner scrollers
+    window.addEventListener('resize', onMove)
+    return () => {
+      window.removeEventListener('scroll', onMove, true)
+      window.removeEventListener('resize', onMove)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, filtered.length])
+
+  // Close on click outside (input + dropdown are the only safe zones) and on Esc.
   useEffect(() => {
     if (!open) return
-    function onClickOut(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose()
+    function onDown(e: MouseEvent) {
+      const tgt = e.target as Node
+      if (inputRef.current?.contains(tgt) || dropRef.current?.contains(tgt)) return
+      onClose()
     }
-    document.addEventListener('mousedown', onClickOut)
-    return () => document.removeEventListener('mousedown', onClickOut)
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [open, onClose])
 
-  // Seed the filter with the current model when the dropdown opens
-  useEffect(() => { if (open) setFilter('') }, [open])
-
-  const filtered = models.filter(m =>
-    m.toLowerCase().includes(filter.toLowerCase()))
-
   return (
-    <div ref={ref} className="model-picker">
+    <div className="model-picker">
       <div className="model-picker-row">
         <input
+          ref={inputRef}
           type="text"
-          value={provider.model}
-          onChange={e => onChange(e.target.value)}
-          onFocus={() => { if (models.length > 0) onToggleOpen() }}
+          value={value}
+          placeholder={t.llmModelsFilter}
+          onChange={e => { onChange(e.target.value); if (!open && models.length > 0) onOpen() }}
+          onFocus={() => { if (models.length > 0) onOpen() }}
         />
         {!isAnthropic && (
           <button
@@ -327,25 +370,23 @@ function ModelPicker({
         <div className="model-hint ok">{t.llmModelsLoaded(models.length)}</div>
       )}
 
-      {open && models.length > 0 && (
-        <div className="model-dropdown">
-          <div className="model-dropdown-search">
-            <input
-              type="text"
-              autoFocus
-              placeholder={t.llmModelsFilter}
-              value={filter}
-              onChange={e => setFilter(e.target.value)}
-            />
-          </div>
+      {open && models.length > 0 && pos && (
+        <div
+          ref={dropRef}
+          className="model-dropdown"
+          style={{
+            left: pos.left, width: pos.width,
+            top: pos.top, bottom: pos.bottom,
+          }}
+        >
           <div className="model-dropdown-list">
             {filtered.length === 0 ? (
               <div className="model-dropdown-empty">{t.llmModelsEmpty}</div>
             ) : filtered.map(m => (
               <div
                 key={m}
-                className={`model-dropdown-item ${m === provider.model ? 'selected' : ''}`}
-                onClick={() => onSelect(m)}
+                className={`model-dropdown-item ${m === value ? 'selected' : ''}`}
+                onMouseDown={() => onSelect(m)}
               >{m}</div>
             ))}
           </div>
