@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/zh-CN/) — `Added / Chang
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-05-01
+### Added
+- 偏好设置 → AI 中，每个大模型的「模型名称」旁新增 ↻ 按钮，可从服务商 `/models` 接口自动获取可选模型列表
+  - 点击后展开下拉，支持文字过滤、点选填入；当前模型高亮
+  - 加载中 ↻ 旋转，成功变绿并提示数量，失败变红并显示原因（如 401）
+  - Anthropic 官方接口不提供模型列表，自动隐藏 ↻ 按钮，保持手动填写
+
+### Notes
+- 新增后端 `list_llm_models` 命令与 `llm_models_listed` / `llm_models_error` 事件（与本地 Whisper 模型检测的 `list_models` / `models_listed` 互不冲突）
+
 ## [0.1.5] - 2026-05-01
 ### Added
 - 底部统计栏显示当前打开的视频文件夹或字幕文件夹名称（仅在「添加视频文件夹」/「添加字幕文件夹」时显示，手动添加单个文件不显示；悬停可见完整路径）

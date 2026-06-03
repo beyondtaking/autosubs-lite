@@ -7,8 +7,10 @@ Batch subtitle generator powered by **Whisper transcription** + **LLM translatio
 - 💻 Native desktop app (Tauri v2, macOS & Windows)
 - 🎙️ Local Whisper transcription (mlx-whisper on Apple Silicon / faster-whisper on Windows & Intel Mac)
 - 🌐 LLM translation: DeepSeek / GLM / Kimi / OpenAI / Anthropic / MiniMax
+- 🔄 One-click model discovery: fetch the provider's available models from its `/models` endpoint and pick from a searchable dropdown
 - 📝 Chinese subtitles reorganized by **Chinese semantics** — not forced into 1:1 alignment with English cues
 - 🔁 Resume support: progress is saved to a task file and restored automatically
+- ↺ Retry failed items individually or in bulk
 
 ## Screenshots
 
@@ -31,7 +33,7 @@ Batch subtitle generator powered by **Whisper transcription** + **LLM translatio
 
 **Step 1 — Install the DMG**
 
-Open `AutoSubs Lite_0.1.3_aarch64.dmg` and drag the app to **Applications**.
+Open `AutoSubs Lite_0.1.6_aarch64.dmg` and drag the app to **Applications**.
 
 **Step 2 — Set up the Python environment (required)**
 
@@ -84,7 +86,7 @@ During setup, **check "Add Python to PATH"**.
 
 **Step 2 — Install the app**
 
-Download `AutoSubs.Lite_0.1.1_x64_en-US.msi` from GitHub Releases and run it.
+Download `AutoSubs.Lite_0.1.6_x64_en-US.msi` from GitHub Releases and run it.
 
 **Step 3 — Set up the Python environment (required)**
 
@@ -130,6 +132,11 @@ Same as macOS step 3 — open the app, check the log, download a Whisper model, 
 | MiniMax | `https://api.minimax.chat/v1` | `abab6.5s-chat` |
 
 > The Anthropic Messages API is detected automatically from the base_url — no extra config needed.
+
+> **Tip:** For any OpenAI-compatible provider, click the **↻** button next to the model field
+> (Preferences → AI) to fetch the live model list from the provider's `/models` endpoint and
+> pick from a searchable dropdown. Anthropic does not expose this endpoint, so its model name
+> must be entered manually.
 
 ---
 

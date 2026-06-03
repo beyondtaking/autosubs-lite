@@ -78,6 +78,12 @@ function LLMTab() {
   const [testing, setTesting] = useState<Record<string,'idle'|'testing'>>({})
   const [statuses, setStatuses] = useState<Record<string, LLMStatus | undefined>>({})
 
+  // Model-list fetching state (keyed by provider id) — mirrors the test_llm pattern
+  const [modelLists,    setModelLists]    = useState<Record<string, string[]>>({})
+  const [fetchingModels, setFetchingModels] = useState<Record<string, boolean>>({})
+  const [modelErrors,   setModelErrors]   = useState<Record<string, string | undefined>>({})
+  const [openDropdown,  setOpenDropdown]  = useState<string | null>(null)
+
   // Subscribe to test_result events from Python; match by provider_id echoed back
   useEffect(() => {
     let unlisten: (() => void) | undefined
@@ -95,6 +101,28 @@ function LLMTab() {
       }
     }).then(u => { unlisten = u })
     return () => { unlisten?.() }
+  }, [])
+
+  // Subscribe to LLM model-list events
+  useEffect(() => {
+    const offs: Array<() => void> = []
+    listen<any>('python:llm_models_listed', e => {
+      const pid: string | undefined = e.payload?.provider_id
+      if (!pid) return
+      const models: string[] = e.payload?.models ?? []
+      setFetchingModels(s => ({ ...s, [pid]: false }))
+      setModelErrors(s => ({ ...s, [pid]: undefined }))
+      setModelLists(s => ({ ...s, [pid]: models }))
+      setOpenDropdown(models.length > 0 ? pid : null)
+    }).then(u => offs.push(u))
+    listen<any>('python:llm_models_error', e => {
+      const pid: string | undefined = e.payload?.provider_id
+      if (!pid) return
+      const raw = String(e.payload?.error ?? '')
+      setFetchingModels(s => ({ ...s, [pid]: false }))
+      setModelErrors(s => ({ ...s, [pid]: raw.replace(/\s+/g, ' ').slice(0, 100) || 'unknown error' }))
+    }).then(u => offs.push(u))
+    return () => offs.forEach(u => u())
   }, [])
 
   function buildProxy(): string | null {
@@ -116,6 +144,22 @@ function LLMTab() {
     })
     // Safety: clear "testing" if Python never replies within 30s
     setTimeout(() => setTesting(s => s[p.id] === 'testing' ? { ...s, [p.id]: 'idle' } : s), 30000)
+  }
+
+  async function handleFetchModels(p: LLMProvider) {
+    setOpenDropdown(null)
+    setFetchingModels(s => ({ ...s, [p.id]: true }))
+    setModelErrors(s => ({ ...s, [p.id]: undefined }))
+    await invoke('send_to_python', {
+      cmd: {
+        cmd: 'list_llm_models',
+        provider_id: p.id,
+        provider: { base_url: p.baseUrl, api_key: p.apiKey, model: p.model },
+        proxy: buildProxy(),
+      },
+    })
+    // Safety: clear loading if Python never replies within 20s
+    setTimeout(() => setFetchingModels(s => s[p.id] ? { ...s, [p.id]: false } : s), 20000)
   }
 
   return (
@@ -155,8 +199,20 @@ function LLMTab() {
                   </div>
                   <div className="pfield">
                     <label>{t.llmModel}</label>
-                    <input type="text" value={p.model}
-                      onChange={e => updateProvider(p.id,{model:e.target.value})} />
+                    <ModelPicker
+                      provider={p}
+                      models={modelLists[p.id] ?? []}
+                      loading={!!fetchingModels[p.id]}
+                      error={modelErrors[p.id]}
+                      open={openDropdown === p.id}
+                      onFetch={() => handleFetchModels(p)}
+                      onToggleOpen={() =>
+                        setOpenDropdown(openDropdown === p.id ? null : p.id)}
+                      onClose={() => setOpenDropdown(null)}
+                      onChange={v => updateProvider(p.id, { model: v })}
+                      onSelect={v => { updateProvider(p.id, { model: v }); setOpenDropdown(null) }}
+                      t={t}
+                    />
                   </div>
                   <div className="llm-actions">
                     <button className="test-btn"
@@ -202,6 +258,99 @@ function LLMTab() {
         </div>
         <p style={{ fontSize:10, color:'var(--text3)', marginTop:4 }}>{t.llmBatchHint}</p>
       </div>
+    </div>
+  )
+}
+
+// ── Model Picker (input + fetch button + dropdown) ────────────────
+
+function ModelPicker({
+  provider, models, loading, error, open,
+  onFetch, onToggleOpen, onClose, onChange, onSelect, t,
+}: {
+  provider: LLMProvider
+  models: string[]
+  loading: boolean
+  error?: string
+  open: boolean
+  onFetch: () => void
+  onToggleOpen: () => void
+  onClose: () => void
+  onChange: (v: string) => void
+  onSelect: (v: string) => void
+  t: any
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [filter, setFilter] = useState('')
+
+  // Anthropic endpoints have no compatible /models list
+  const isAnthropic = /anthropic\.com/.test(provider.baseUrl)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!open) return
+    function onClickOut(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose()
+    }
+    document.addEventListener('mousedown', onClickOut)
+    return () => document.removeEventListener('mousedown', onClickOut)
+  }, [open, onClose])
+
+  // Seed the filter with the current model when the dropdown opens
+  useEffect(() => { if (open) setFilter('') }, [open])
+
+  const filtered = models.filter(m =>
+    m.toLowerCase().includes(filter.toLowerCase()))
+
+  return (
+    <div ref={ref} className="model-picker">
+      <div className="model-picker-row">
+        <input
+          type="text"
+          value={provider.model}
+          onChange={e => onChange(e.target.value)}
+          onFocus={() => { if (models.length > 0) onToggleOpen() }}
+        />
+        {!isAnthropic && (
+          <button
+            className={`model-refresh-btn ${loading ? 'loading' : ''} ${error ? 'err' : ''} ${models.length > 0 && !error ? 'ok' : ''}`}
+            title={t.llmFetchModels}
+            onClick={onFetch}
+            disabled={loading}
+          >↻</button>
+        )}
+      </div>
+
+      {loading && <div className="model-hint">{t.llmFetchingModels}</div>}
+      {!loading && error && <div className="model-hint err" title={error}>{error}</div>}
+      {!loading && !error && models.length > 0 && (
+        <div className="model-hint ok">{t.llmModelsLoaded(models.length)}</div>
+      )}
+
+      {open && models.length > 0 && (
+        <div className="model-dropdown">
+          <div className="model-dropdown-search">
+            <input
+              type="text"
+              autoFocus
+              placeholder={t.llmModelsFilter}
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
+            />
+          </div>
+          <div className="model-dropdown-list">
+            {filtered.length === 0 ? (
+              <div className="model-dropdown-empty">{t.llmModelsEmpty}</div>
+            ) : filtered.map(m => (
+              <div
+                key={m}
+                className={`model-dropdown-item ${m === provider.model ? 'selected' : ''}`}
+                onClick={() => onSelect(m)}
+              >{m}</div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

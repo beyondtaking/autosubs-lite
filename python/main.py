@@ -473,6 +473,23 @@ def main():
                 emit({"type": "test_result", "provider_id": _pid, **result})
             threading.Thread(target=_do_test, daemon=True).start()
 
+        # ── list LLM models from provider /models endpoint ──
+        elif action == "list_llm_models":
+            provider    = cmd.get("provider", {})
+            provider_id = cmd.get("provider_id")
+            proxy       = cmd.get("proxy")
+            apply_proxy(proxy)
+            def _do_list(_prov=provider, _pid=provider_id, _proxy=proxy):
+                from translator import list_models
+                result = list_models(_prov, proxy=_proxy)
+                if result.get("ok"):
+                    emit({"type": "llm_models_listed", "provider_id": _pid,
+                          "models": result["models"]})
+                else:
+                    emit({"type": "llm_models_error", "provider_id": _pid,
+                          "error": result.get("error", "unknown error")})
+            threading.Thread(target=_do_list, daemon=True).start()
+
         # ── test proxy connectivity (no LLM key required) ──
         elif action == "test_proxy":
             proxy = cmd.get("proxy")

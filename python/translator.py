@@ -447,6 +447,52 @@ def test_connection(config: dict, proxy: Optional[str] = None) -> dict:
         return {"ok": False, "error": str(e)}
 
 
+def list_models(config: dict, proxy: Optional[str] = None) -> dict:
+    """
+    Fetch the available model list from an OpenAI-compatible /models endpoint.
+
+    Returns {"ok": True, "models": ["id1", "id2", ...]}
+            {"ok": False, "error": "..."}
+
+    Anthropic and Google endpoints do not expose a compatible /models list,
+    so callers should only invoke this for OpenAI-compatible providers.
+    """
+    _setup_proxy(proxy)
+
+    base_url = config["base_url"].rstrip("/")
+    api_key  = config["api_key"]
+
+    if _is_anthropic(base_url):
+        return {"ok": False, "error": "Anthropic 接口不支持获取模型列表，请手动填写模型名"}
+
+    url = f"{base_url}/models"
+    headers = {"Authorization": f"Bearer {api_key}"}
+    try:
+        req = urllib.request.Request(url, headers=headers, method="GET")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        # Standard OpenAI shape: {"data": [{"id": "..."}, ...]}
+        raw = data.get("data", data if isinstance(data, list) else [])
+        models = []
+        for m in raw:
+            if isinstance(m, dict):
+                mid = m.get("id") or m.get("name")
+                if mid:
+                    models.append(mid)
+            elif isinstance(m, str):
+                models.append(m)
+        models = sorted(set(models))
+        return {"ok": True, "models": models}
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            return {"ok": False, "error": f"认证失败（HTTP {e.code}）：API Key 无效"}
+        if e.code in (404, 405):
+            return {"ok": False, "error": f"该接口不支持获取模型列表（HTTP {e.code}）"}
+        return {"ok": False, "error": f"HTTP {e.code}: {e.reason}"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 def _setup_proxy(proxy_url):
     """
     Install a urllib opener that matches the requested proxy mode.
