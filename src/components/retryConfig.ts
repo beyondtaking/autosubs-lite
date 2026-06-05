@@ -19,7 +19,10 @@ export function buildRetryConfig(
     const absPath = (s.rootDir && !f.path.startsWith('/'))
       ? `${s.rootDir}/${f.path}`
       : f.path
-    return { path: absPath, is_subtitle: f.isSubtitle }
+    // Carry the frontend's stable identifier (relPath) so Python echoes it back
+    // in progress/done/error events — otherwise events keyed by the absolute
+    // path won't match folder-scanned queue items (keyed by relPath).
+    return { path: absPath, rel: f.relPath, is_subtitle: f.isSubtitle }
   })
 
   return {

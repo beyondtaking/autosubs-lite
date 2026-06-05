@@ -312,13 +312,19 @@ def run_queue(config: dict):
         if isinstance(f, dict):
             p      = f["path"]
             is_sub = f.get("is_subtitle", False)
+            # Event identifier echoed back to the frontend. Defaults to the
+            # path, but retries pass an explicit "rel" (the queue item's
+            # relPath) so progress/done/error events match folder-scanned
+            # items that are keyed by relative path rather than absolute.
+            rel    = f.get("rel") or p
         else:
             p      = f
             is_sub = _is_subtitle_file(p)
+            rel    = p
         pending.append({
             "path":        p,
             "_abs":        p,
-            "_rel":        p,
+            "_rel":        rel,
             "status":      "pending",
             "is_subtitle": is_sub,
             "_task_item":  False,
